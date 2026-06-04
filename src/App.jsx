@@ -21,7 +21,6 @@ export default function App() {
 
   const [sessionExpired, setSessionExpired] = useState(false);
 
-  /* ================= LOGIN ================= */
   const login = async () => {
     try {
       const res = await API.post("/login", {
@@ -42,13 +41,22 @@ export default function App() {
     setToken("");
   };
 
-  /* ================= FETCH ================= */
   const fetchTickets = async () => {
     try {
       const res = await API.get("/tickets", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTickets(Array.isArray(res.data) ? res.data : []);
+
+      setTickets(
+        Array.isArray(res.data)
+          ? res.data.map((t) => ({
+              ...t,
+              image: t.image || null,
+              upi_image: t.upi_image || null,
+            }))
+          : []
+      );
+
       setSessionExpired(false);
     } catch (err) {
       if (err.response?.status === 401 && !sessionExpired) {
@@ -82,7 +90,6 @@ export default function App() {
     }
   };
 
-  /* ================= AUTO REFRESH ================= */
   useEffect(() => {
     if (!token) return;
 
@@ -101,7 +108,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, [token]);
 
-  /* ================= ACTIONS ================= */
   const handleAction = async (id, action) => {
     try {
       setLoadingId(id);
@@ -132,7 +138,6 @@ export default function App() {
     }
   };
 
-  /* ================= FILTER ================= */
   const filteredTickets = tickets.filter((t) => {
     const s = search.toLowerCase();
     const upi = (t.upi_id || "").toLowerCase();
@@ -157,7 +162,6 @@ export default function App() {
     return matchSearch && matchFilter;
   });
 
-  /* ================= LOGIN UI ================= */
   if (!token) {
     return (
       <div className="login">
@@ -169,7 +173,6 @@ export default function App() {
     );
   }
 
-  /* ================= MAIN UI ================= */
   return (
     <div className="container">
 
@@ -178,7 +181,6 @@ export default function App() {
         <h2>Snackit Dashboard</h2>
       </div>
 
-      {/* ================= NAV ================= */}
       <div className="controls">
         <button className="btn red" onClick={() => setView("tickets")}>
           📄 Tickets
@@ -221,60 +223,92 @@ export default function App() {
             </button>
           </div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Phone</th>
-                <th>Main</th>
-                <th>Sub</th>
-                <th>Issue</th>
-                <th>Location</th>
-                <th>UPI</th>
-                <th>Status</th>
-                <th>State</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredTickets.map((t, i) => (
-                <tr key={t.id}>
-                  <td>{i + 1}</td>
-                  <td>{t.phone}</td>
-                  <td>{t.main_issue || "-"}</td>
-                  <td>{t.sub_issue || "-"}</td>
-                  <td>{t.issue || "-"}</td>
-                  <td>{t.location || "-"}</td>
-                  <td>{t.upi_id || "-"}</td>
-                  <td>{t.status || "-"}</td>
-                  <td>{t.state}</td>
-                  <td>
-                    {t.created_at
-                      ? new Date(t.created_at).toLocaleString()
-                      : "-"}
-                  </td>
-
-                  <td>
-                    <button onClick={() => handleAction(t.id, "REFUNDED")}>
-                      Refund
-                    </button>
-                    <button onClick={() => handleAction(t.id, "RESOLVED")}>
-                      Resolve
-                    </button>
-                    <button onClick={() => deleteTicket(t.id)}>
-                      Close
-                    </button>
-                  </td>
+          {/* ✅ ONLY CHANGE IS HERE */}
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Phone</th>
+                  <th>Main</th>
+                  <th>Sub</th>
+                  <th>Issue</th>
+                  <th>Location</th>
+                  <th>UPI</th>
+                  <th>Image</th>
+                  <th>UPI Screenshot</th>
+                  <th>Status</th>
+                  <th>State</th>
+                  <th>Date</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {filteredTickets.map((t, i) => (
+                  <tr key={t.id}>
+                    <td>{i + 1}</td>
+                    <td>{t.phone}</td>
+                    <td>{t.main_issue || "-"}</td>
+                    <td>{t.sub_issue || "-"}</td>
+                    <td>{t.issue || "-"}</td>
+                    <td>{t.location || "-"}</td>
+                    <td>{t.upi_id || "-"}</td>
+
+                    <td>
+                      {t.image ? (
+                        <img
+                          src={t.image}
+                          alt="img"
+                          style={{ width: "60px", cursor: "pointer" }}
+                          onClick={() => window.open(t.image, "_blank")}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+
+                    <td>
+                      {t.upi_image ? (
+                        <img
+                          src={t.upi_image}
+                          alt="upi"
+                          style={{ width: "60px", cursor: "pointer" }}
+                          onClick={() => window.open(t.upi_image, "_blank")}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+
+                    <td>{t.status || "-"}</td>
+                    <td>{t.state}</td>
+                    <td>
+                      {t.created_at
+                        ? new Date(t.created_at).toLocaleString()
+                        : "-"}
+                    </td>
+
+                    <td>
+                      <button onClick={() => handleAction(t.id, "REFUNDED")}>
+                        Refund
+                      </button>
+                      <button onClick={() => handleAction(t.id, "RESOLVED")}>
+                        Resolve
+                      </button>
+                      <button onClick={() => deleteTicket(t.id)}>
+                        Close
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
 
-      {/* ================= FEEDBACK ================= */}
+      {/* FEEDBACK */}
       {view === "feedback" && (
         <table>
           <thead>
@@ -305,7 +339,7 @@ export default function App() {
         </table>
       )}
 
-      {/* ================= PRODUCTS ================= */}
+      {/* PRODUCTS */}
       {view === "products" && (
         <table>
           <thead>

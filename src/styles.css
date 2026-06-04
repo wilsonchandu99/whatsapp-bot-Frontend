@@ -42,9 +42,14 @@ body {
   font-size: 14px;
 }
 
-/* ✅ APPLY BUTTON CLASS HERE */
 .controls button {
   margin-right: 10px;
+}
+
+/* ================= TABLE WRAPPER FIX (IMPORTANT) ================= */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
 }
 
 /* TABLE */
@@ -54,6 +59,9 @@ table {
   background: white;
   border-radius: 10px;
   overflow: hidden;
+
+  /* ✅ FIX FOR MISSING / HIDDEN COLUMNS */
+  white-space: nowrap;
 }
 
 /* HEADER */
@@ -79,6 +87,15 @@ tbody tr:hover {
   background: #fafafa;
 }
 
+/* IMAGE FIX */
+td img {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
 /* STATUS BADGE */
 .status {
   padding: 4px 10px;
@@ -96,13 +113,6 @@ tbody tr:hover {
   background: #6c757d;
 }
 
-/* IMAGE */
-td img {
-  width: 55px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-}
-
 /* ACTION BUTTONS */
 .actions {
   display: flex;
@@ -112,7 +122,6 @@ td img {
 
 /* ================= BUTTON SYSTEM ================= */
 
-/* BASE */
 .btn {
   border: 1px solid #dc3545;
   padding: 6px 12px;
@@ -122,7 +131,6 @@ td img {
   transition: 0.15s;
 }
 
-/* 🔴 SOLID RED */
 .btn.red {
   background: #dc3545;
   color: white;
@@ -133,7 +141,6 @@ td img {
   background: #b02a37;
 }
 
-/* 🔴 OUTLINE RED */
 .btn.red-outline {
   background: transparent;
   color: #dc3545;
@@ -144,7 +151,6 @@ td img {
   color: white;
 }
 
-/* DISABLED */
 .btn:disabled {
   border-color: #aaa;
   color: #aaa;
@@ -191,7 +197,6 @@ td img {
   border: 1px solid #ccc;
 }
 
-/* ✅ LOGIN BUTTON USES SAME SYSTEM */
 .login button {
   padding: 10px 20px;
 }
