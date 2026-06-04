@@ -1,0 +1,197 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f4f6f9;
+  color: #333;
+}
+
+/* CONTAINER */
+.container {
+  padding: 20px;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header img {
+  width: 45px;
+  margin-right: 10px;
+}
+
+.header h2 {
+  margin: 0;
+  font-weight: 600;
+  color: #222;
+}
+
+/* CONTROLS */
+.controls {
+  margin-bottom: 15px;
+}
+
+.controls input,
+.controls select {
+  padding: 8px 12px;
+  margin-right: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* ✅ APPLY BUTTON CLASS HERE */
+.controls button {
+  margin-right: 10px;
+}
+
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* HEADER */
+thead {
+  background: #1f1f1f;
+  color: white;
+}
+
+th {
+  padding: 12px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* ROWS */
+td {
+  padding: 12px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+tbody tr:hover {
+  background: #fafafa;
+}
+
+/* STATUS BADGE */
+.status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: white;
+  font-weight: 500;
+}
+
+.status.open {
+  background: #dc3545;
+}
+
+.status.closed {
+  background: #6c757d;
+}
+
+/* IMAGE */
+td img {
+  width: 55px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* ACTION BUTTONS */
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ================= BUTTON SYSTEM ================= */
+
+/* BASE */
+.btn {
+  border: 1px solid #dc3545;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.15s;
+}
+
+/* 🔴 SOLID RED */
+.btn.red {
+  background: #dc3545;
+  color: white;
+  border: none;
+}
+
+.btn.red:hover {
+  background: #b02a37;
+}
+
+/* 🔴 OUTLINE RED */
+.btn.red-outline {
+  background: transparent;
+  color: #dc3545;
+}
+
+.btn.red-outline:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* DISABLED */
+.btn:disabled {
+  border-color: #aaa;
+  color: #aaa;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+/* PAGINATION */
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination button {
+  margin: 3px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background: #eee;
+}
+
+.pagination .active {
+  background: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+
+/* LOGIN */
+.login {
+  padding: 40px;
+  text-align: center;
+}
+
+.login input {
+  padding: 10px;
+  margin: 10px;
+  width: 250px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* ✅ LOGIN BUTTON USES SAME SYSTEM */
+.login button {
+  padding: 10px 20px;
+}
