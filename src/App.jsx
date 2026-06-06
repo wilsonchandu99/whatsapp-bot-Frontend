@@ -31,6 +31,7 @@ export default function App() {
   const [analyticsDaily, setAnalyticsDaily] = useState([]);
   const [analyticsMonthly, setAnalyticsMonthly] = useState([]);
   const [analyticsCategory, setAnalyticsCategory] = useState([]);
+  const [selectedIssue, setSelectedIssue] = useState("ALL");
 
   const [view, setView] = useState("tickets");
 
@@ -246,19 +247,19 @@ export default function App() {
 
       <div className="controls">
         <button className="btn red" onClick={() => setView("tickets")}>
-          Ã°Å¸â€œâ€ž Tickets
+          ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã¢â‚¬Å¾ Tickets
         </button>
 
         <button className="btn red-outline" onClick={() => setView("feedback")}>
-          Ã°Å¸â€œÂ Feedback
+          ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â Feedback
         </button>
 
         <button className="btn red-outline" onClick={() => setView("products")}>
-          Ã°Å¸â€œÂ¦ Products
+          ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¦ Products
         </button>
 
         <button className="btn red-outline" onClick={() => setView("analytics")}>
-          ðŸ“Š Analytics
+          Ã°Å¸â€œÅ  Analytics
         </button>
 
         <button className="btn red-outline" onClick={logout}>
@@ -354,7 +355,7 @@ export default function App() {
                         : "-"}
                     </td>
 
-                    {/* Ã¢Å“â€¦ UPDATED ONLY HERE */}
+                    {/* ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ UPDATED ONLY HERE */}
                     <td className="actions">
                       <button
                         className="btn red-outline"
@@ -410,7 +411,7 @@ export default function App() {
               <tr key={f.id}>
                 <td>{f.id}</td>
                 <td>{f.phone}</td>
-                <td>Ã¢Â­Â {f.rating}/5</td>
+                <td>ÃƒÂ¢Ã‚Â­Ã‚Â {f.rating}/5</td>
                 <td>{f.comment}</td>
                 <td>
                   {f.created_at
@@ -453,7 +454,7 @@ export default function App() {
 
       {view === "analytics" && (
         <div>
-          <h3>ðŸ“Š Daily Not Dispensed</h3>
+          <h3>Ã°Å¸â€œÅ  Daily Not Dispensed</h3>
           <BarChart width={600} height={300} data={analyticsDaily}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
@@ -462,7 +463,7 @@ export default function App() {
             <Bar dataKey="count" fill="#ef4444" />
           </BarChart>
 
-          <h3>ðŸ“ˆ Monthly Trend</h3>
+          <h3>Ã°Å¸â€œË† Monthly Trend</h3>
           <LineChart width={600} height={300} data={analyticsMonthly}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
@@ -471,21 +472,57 @@ export default function App() {
             <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} />
           </LineChart>
 
-          <h3>ðŸ¥§ Issue Breakdown</h3>
-         <PieChart width={600} height={350}>
-  <Pie
-    data={analyticsCategory}
-    dataKey="count"
-    nameKey="issue"
-    outerRadius={120}
-    label={({ issue, count }) => `${issue}: ${count}`}
-  >
-    {analyticsCategory.map((_, i) => (
-      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-    ))}
-  </Pie>
-  <Tooltip formatter={(value, name) => [`${value}`, name]} />
-</PieChart>
+          <h3>Issue Breakdown</h3>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "30px" }}>
+            <PieChart width={500} height={350}>
+              <Pie
+                data={
+                  selectedIssue === "ALL"
+                    ? analyticsCategory
+                    : analyticsCategory.filter((item) => item.issue === selectedIssue)
+                }
+                dataKey="count"
+                nameKey="issue"
+                outerRadius={120}
+              >
+                {(selectedIssue === "ALL"
+                  ? analyticsCategory
+                  : analyticsCategory.filter((item) => item.issue === selectedIssue)
+                ).map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+
+              <Tooltip formatter={(value, name) => [`${value}`, name]} />
+            </PieChart>
+
+            <div style={{ minWidth: "280px", maxWidth: "360px" }}>
+              <button
+                className={selectedIssue === "ALL" ? "btn red" : "btn red-outline"}
+                onClick={() => setSelectedIssue("ALL")}
+                style={{ marginBottom: "10px" }}
+              >
+                All Issues
+              </button>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {analyticsCategory.map((item, i) => (
+                  <button
+                    key={item.issue}
+                    className={selectedIssue === item.issue ? "btn red" : "btn red-outline"}
+                    onClick={() => setSelectedIssue(item.issue)}
+                    style={{
+                      textAlign: "left",
+                      whiteSpace: "normal",
+                      color: COLORS[i % COLORS.length],
+                    }}
+                  >
+                    {item.issue}: {item.count}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
