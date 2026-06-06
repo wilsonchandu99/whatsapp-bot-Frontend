@@ -141,7 +141,7 @@ export default function App() {
     setAnalyticsCategory(
       Array.isArray(category.data)
         ? category.data.map((x) => ({
-            category: x.category || "Unknown",
+            issue: `${x.main_issue || "Unknown"} - ${x.sub_issue || "Unknown"}`,
             count: Number(x.count || 0),
           }))
         : []
@@ -246,19 +246,19 @@ export default function App() {
 
       <div className="controls">
         <button className="btn red" onClick={() => setView("tickets")}>
-          ðŸ“„ Tickets
+          Ã°Å¸â€œâ€ž Tickets
         </button>
 
         <button className="btn red-outline" onClick={() => setView("feedback")}>
-          ðŸ“ Feedback
+          Ã°Å¸â€œÂ Feedback
         </button>
 
         <button className="btn red-outline" onClick={() => setView("products")}>
-          ðŸ“¦ Products
+          Ã°Å¸â€œÂ¦ Products
         </button>
 
         <button className="btn red-outline" onClick={() => setView("analytics")}>
-          📊 Analytics
+          ðŸ“Š Analytics
         </button>
 
         <button className="btn red-outline" onClick={logout}>
@@ -354,7 +354,7 @@ export default function App() {
                         : "-"}
                     </td>
 
-                    {/* âœ… UPDATED ONLY HERE */}
+                    {/* Ã¢Å“â€¦ UPDATED ONLY HERE */}
                     <td className="actions">
                       <button
                         className="btn red-outline"
@@ -410,7 +410,7 @@ export default function App() {
               <tr key={f.id}>
                 <td>{f.id}</td>
                 <td>{f.phone}</td>
-                <td>â­ {f.rating}/5</td>
+                <td>Ã¢Â­Â {f.rating}/5</td>
                 <td>{f.comment}</td>
                 <td>
                   {f.created_at
@@ -453,7 +453,7 @@ export default function App() {
 
       {view === "analytics" && (
         <div>
-          <h3>📊 Daily Not Dispensed</h3>
+          <h3>ðŸ“Š Daily Not Dispensed</h3>
           <BarChart width={600} height={300} data={analyticsDaily}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
@@ -462,7 +462,7 @@ export default function App() {
             <Bar dataKey="count" fill="#ef4444" />
           </BarChart>
 
-          <h3>📈 Monthly Trend</h3>
+          <h3>ðŸ“ˆ Monthly Trend</h3>
           <LineChart width={600} height={300} data={analyticsMonthly}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
@@ -471,21 +471,21 @@ export default function App() {
             <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} />
           </LineChart>
 
-          <h3>🥧 Issue Breakdown</h3>
-          <PieChart width={400} height={300}>
-            <Pie
-              data={analyticsCategory}
-              dataKey="count"
-              nameKey="issue"
-              outerRadius={100}
-              label
-            >
-              {analyticsCategory.map((_, i) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
+          <h3>ðŸ¥§ Issue Breakdown</h3>
+         <PieChart width={600} height={350}>
+  <Pie
+    data={analyticsCategory}
+    dataKey="count"
+    nameKey="issue"
+    outerRadius={120}
+    label={({ issue, count }) => `${issue}: ${count}`}
+  >
+    {analyticsCategory.map((_, i) => (
+      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+    ))}
+  </Pie>
+  <Tooltip formatter={(value, name) => [`${value}`, name]} />
+</PieChart>
         </div>
       )}
     </div>
