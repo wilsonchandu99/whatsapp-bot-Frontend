@@ -12,6 +12,7 @@ import {
   Cell,
   LineChart,
   Line,
+  Legend,
 } from "recharts";
 import "./styles.css";
 
@@ -29,6 +30,7 @@ export default function App() {
   const [products, setProducts] = useState([]);
 
   const [analyticsDaily, setAnalyticsDaily] = useState([]);
+  const [analyticsDailyKeys, setAnalyticsDailyKeys] = useState([]);
   const [analyticsMonthly, setAnalyticsMonthly] = useState([]);
   const [analyticsCategory, setAnalyticsCategory] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState("ALL");
@@ -118,14 +120,32 @@ export default function App() {
     const monthly = await API.get("/analytics/monthly", { headers });
     const category = await API.get("/analytics/category", { headers });
 
-    setAnalyticsDaily(
-      Array.isArray(daily.data)
-        ? daily.data.map((x) => ({
-            date: x.date ? new Date(x.date).toLocaleDateString() : "-",
-            count: Number(x.count || 0),
-          }))
-        : []
-    );
+    if (Array.isArray(daily.data)) {
+      const grouped = {};
+      const keys = [];
+
+      daily.data.forEach((x) => {
+        const date = x.date ? new Date(x.date).toLocaleDateString() : "-";
+        const subIssue = x.sub_issue || "No Sub Issue";
+        const count = Number(x.count || 0);
+
+        if (!keys.includes(subIssue)) {
+          keys.push(subIssue);
+        }
+
+        if (!grouped[date]) {
+          grouped[date] = { date };
+        }
+
+        grouped[date][subIssue] = count;
+      });
+
+      setAnalyticsDaily(Object.values(grouped));
+      setAnalyticsDailyKeys(keys);
+    } else {
+      setAnalyticsDaily([]);
+      setAnalyticsDailyKeys([]);
+    }
 
     setAnalyticsMonthly(
       Array.isArray(monthly.data)
@@ -247,19 +267,19 @@ export default function App() {
 
       <div className="controls">
         <button className="btn red" onClick={() => setView("tickets")}>
-          ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã¢â‚¬Å¾ Tickets
+          ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ Tickets
         </button>
 
         <button className="btn red-outline" onClick={() => setView("feedback")}>
-          ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â Feedback
+          ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â Feedback
         </button>
 
         <button className="btn red-outline" onClick={() => setView("products")}>
-          ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¦ Products
+          ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¦ Products
         </button>
 
         <button className="btn red-outline" onClick={() => setView("analytics")}>
-          Ã°Å¸â€œÅ  Analytics
+          ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â  Analytics
         </button>
 
         <button className="btn red-outline" onClick={logout}>
@@ -355,7 +375,7 @@ export default function App() {
                         : "-"}
                     </td>
 
-                    {/* ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ UPDATED ONLY HERE */}
+                    {/* ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ UPDATED ONLY HERE */}
                     <td className="actions">
                       <button
                         className="btn red-outline"
@@ -411,7 +431,7 @@ export default function App() {
               <tr key={f.id}>
                 <td>{f.id}</td>
                 <td>{f.phone}</td>
-                <td>ÃƒÂ¢Ã‚Â­Ã‚Â {f.rating}/5</td>
+                <td>ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚Â­Ãƒâ€šÃ‚Â {f.rating}/5</td>
                 <td>{f.comment}</td>
                 <td>
                   {f.created_at
@@ -454,16 +474,24 @@ export default function App() {
 
       {view === "analytics" && (
         <div>
-          <h3>Ã°Å¸â€œÅ  Daily Not Dispensed</h3>
+          <h3>Daily Sub Issues</h3>
           <BarChart width={600} height={300} data={analyticsDaily}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="count" fill="#ef4444" />
+            <Legend />
+            {analyticsDailyKeys.map((key, i) => (
+              <Bar
+                key={key}
+                dataKey={key}
+                stackId="subIssues"
+                fill={COLORS[i % COLORS.length]}
+              />
+            ))}
           </BarChart>
 
-          <h3>Ã°Å¸â€œË† Monthly Trend</h3>
+          <h3>ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‹â€  Monthly Trend</h3>
           <LineChart width={600} height={300} data={analyticsMonthly}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
