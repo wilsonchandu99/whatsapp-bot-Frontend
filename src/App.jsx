@@ -110,20 +110,46 @@ export default function App() {
   };
 
   const fetchAnalytics = async () => {
-    try {
-      const headers = { Authorization: `Bearer ${token}` };
+  try {
+    const headers = { Authorization: `Bearer ${token}` };
 
-      const daily = await API.get("/analytics/not-dispensed-daily", { headers });
-      const monthly = await API.get("/analytics/not-dispensed-monthly", { headers });
-      const category = await API.get("/analytics/issues-breakdown", { headers });
+    const daily = await API.get("/analytics/product-not-dispensed", { headers });
+    const monthly = await API.get("/analytics/monthly", { headers });
+    const category = await API.get("/analytics/category", { headers });
 
-      setAnalyticsDaily(Array.isArray(daily.data) ? daily.data : []);
-      setAnalyticsMonthly(Array.isArray(monthly.data) ? monthly.data : []);
-      setAnalyticsCategory(Array.isArray(category.data) ? category.data : []);
-    } catch (err) {
-      console.log("Analytics error:", err);
-    }
-  };
+    setAnalyticsDaily(
+      Array.isArray(daily.data)
+        ? daily.data.map((x) => ({
+            date: x.date ? new Date(x.date).toLocaleDateString() : "-",
+            count: Number(x.count || 0),
+          }))
+        : []
+    );
+
+    setAnalyticsMonthly(
+      Array.isArray(monthly.data)
+        ? monthly.data.map((x) => ({
+            month: x.month ? new Date(x.month).toLocaleDateString("en-US", {
+              month: "short",
+              year: "numeric",
+            }) : "-",
+            count: Number(x.count || 0),
+          }))
+        : []
+    );
+
+    setAnalyticsCategory(
+      Array.isArray(category.data)
+        ? category.data.map((x) => ({
+            category: x.category || "Unknown",
+            count: Number(x.count || 0),
+          }))
+        : []
+    );
+  } catch (err) {
+    console.log("Analytics error:", err);
+  }
+};
 
   useEffect(() => {
     if (!token) return;
