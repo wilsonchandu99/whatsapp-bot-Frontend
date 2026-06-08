@@ -25,6 +25,9 @@ const COLORS = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6"];
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
 
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   const [tickets, setTickets] = useState([]);
   const [feedback, setFeedback] = useState([]);
   const [products, setProducts] = useState([]);
@@ -46,8 +49,8 @@ export default function App() {
   const login = async () => {
     try {
       const res = await API.post("/login", {
-        username: "admin",
-        password: "admin",
+        username,
+        password,
       });
 
       localStorage.setItem("token", res.data.token);
@@ -113,64 +116,66 @@ export default function App() {
   };
 
   const fetchAnalytics = async () => {
-  try {
-    const headers = { Authorization: `Bearer ${token}` };
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
 
-    const daily = await API.get("/analytics/product-not-dispensed", { headers });
-    const monthly = await API.get("/analytics/monthly", { headers });
-    const category = await API.get("/analytics/category", { headers });
+      const daily = await API.get("/analytics/product-not-dispensed", { headers });
+      const monthly = await API.get("/analytics/monthly", { headers });
+      const category = await API.get("/analytics/category", { headers });
 
-    if (Array.isArray(daily.data)) {
-      const grouped = {};
-      const keys = [];
+      if (Array.isArray(daily.data)) {
+        const grouped = {};
+        const keys = [];
 
-      daily.data.forEach((x) => {
-        const date = x.date ? new Date(x.date).toLocaleDateString() : "-";
-        const subIssue = x.sub_issue || "No Sub Issue";
-        const count = Number(x.count || 0);
+        daily.data.forEach((x) => {
+          const date = x.date ? new Date(x.date).toLocaleDateString() : "-";
+          const subIssue = x.sub_issue || "No Sub Issue";
+          const count = Number(x.count || 0);
 
-        if (!keys.includes(subIssue)) {
-          keys.push(subIssue);
-        }
+          if (!keys.includes(subIssue)) {
+            keys.push(subIssue);
+          }
 
-        if (!grouped[date]) {
-          grouped[date] = { date };
-        }
+          if (!grouped[date]) {
+            grouped[date] = { date };
+          }
 
-        grouped[date][subIssue] = count;
-      });
+          grouped[date][subIssue] = count;
+        });
 
-      setAnalyticsDaily(Object.values(grouped));
-      setAnalyticsDailyKeys(keys);
-    } else {
-      setAnalyticsDaily([]);
-      setAnalyticsDailyKeys([]);
+        setAnalyticsDaily(Object.values(grouped));
+        setAnalyticsDailyKeys(keys);
+      } else {
+        setAnalyticsDaily([]);
+        setAnalyticsDailyKeys([]);
+      }
+
+      setAnalyticsMonthly(
+        Array.isArray(monthly.data)
+          ? monthly.data.map((x) => ({
+              month: x.month
+                ? new Date(x.month).toLocaleDateString("en-US", {
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "-",
+              count: Number(x.count || 0),
+            }))
+          : []
+      );
+
+      setAnalyticsCategory(
+        Array.isArray(category.data)
+          ? category.data.map((x) => ({
+              issue: `${x.main_issue || "Unknown"} - ${x.sub_issue || "Unknown"}`,
+              count: Number(x.count || 0),
+            }))
+          : []
+      );
+    } catch (err) {
+      console.log("Analytics error:", err);
     }
-
-    setAnalyticsMonthly(
-      Array.isArray(monthly.data)
-        ? monthly.data.map((x) => ({
-            month: x.month ? new Date(x.month).toLocaleDateString("en-US", {
-              month: "short",
-              year: "numeric",
-            }) : "-",
-            count: Number(x.count || 0),
-          }))
-        : []
-    );
-
-    setAnalyticsCategory(
-      Array.isArray(category.data)
-        ? category.data.map((x) => ({
-            issue: `${x.main_issue || "Unknown"} - ${x.sub_issue || "Unknown"}`,
-            count: Number(x.count || 0),
-          }))
-        : []
-    );
-  } catch (err) {
-    console.log("Analytics error:", err);
-  }
-};
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -247,42 +252,100 @@ export default function App() {
   });
 
   if (!token) {
-  return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      
-      {/* LEFT SIDE IMAGE */}
-      <div style={{ flex: 1 }}>
-        <img
-          src="/login.png"
-          alt="Snackit"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
-      </div>
+    return (
+      <div style={{ display: "flex", height: "100vh" }}>
+        {/* LEFT SIDE IMAGE */}
+        <div style={{ flex: 1 }}>
+          <img
+            src="/login.png"
+            alt="Snackit"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </div>
 
-      {/* RIGHT SIDE LOGIN */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "column",
-        }}
-      >
-        <h2>Snackit Dashboard</h2>
-        <button onClick={login}>Login</button>
+        {/* RIGHT SIDE LOGIN */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            background: "#fff",
+          }}
+        >
+          <div
+            style={{
+              width: "320px",
+              padding: "40px",
+              borderRadius: "12px",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+              textAlign: "center",
+            }}
+          >
+            <h2 style={{ color: "#ef4444", marginBottom: "20px" }}>
+              Admin Login
+            </h2>
+
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                marginBottom: "15px",
+                borderRadius: "8px",
+                border: "1px solid #ddd",
+                outline: "none",
+              }}
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                marginBottom: "20px",
+                borderRadius: "8px",
+                border: "1px solid #ddd",
+                outline: "none",
+              }}
+            />
+
+            <button
+              onClick={login}
+              style={{
+                width: "100%",
+                padding: "12px",
+                background: "#ef4444",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                transition: "0.3s",
+              }}
+              onMouseOver={(e) => (e.target.style.background = "#dc2626")}
+              onMouseOut={(e) => (e.target.style.background = "#ef4444")}
+            >
+              Login
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="container">
-
       <div className="header">
         <img src="/logo.png" alt="logo" />
         <h2>Snackit Dashboard</h2>
@@ -290,19 +353,19 @@ export default function App() {
 
       <div className="controls">
         <button className="btn red" onClick={() => setView("tickets")}>
-          ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ Tickets
+          ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ Tickets
         </button>
 
         <button className="btn red-outline" onClick={() => setView("feedback")}>
-          ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â Feedback
+          ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Feedback
         </button>
 
         <button className="btn red-outline" onClick={() => setView("products")}>
-          ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¦ Products
+          ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ Products
         </button>
 
         <button className="btn red-outline" onClick={() => setView("analytics")}>
-          ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â  Analytics
+          ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€¦Ã‚Â  Analytics
         </button>
 
         <button className="btn red-outline" onClick={logout}>
@@ -398,7 +461,7 @@ export default function App() {
                         : "-"}
                     </td>
 
-                    {/* ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ UPDATED ONLY HERE */}
+                    {/* ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ UPDATED ONLY HERE */}
                     <td className="actions">
                       <button
                         className="btn red-outline"
@@ -428,7 +491,6 @@ export default function App() {
                         Close
                       </button>
                     </td>
-
                   </tr>
                 ))}
               </tbody>
@@ -454,7 +516,7 @@ export default function App() {
               <tr key={f.id}>
                 <td>{f.id}</td>
                 <td>{f.phone}</td>
-                <td>ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚Â­Ãƒâ€šÃ‚Â {f.rating}/5</td>
+                <td>ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â {f.rating}/5</td>
                 <td>{f.comment}</td>
                 <td>
                   {f.created_at
@@ -514,7 +576,7 @@ export default function App() {
             ))}
           </BarChart>
 
-          <h3>ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‹â€  Monthly Trend</h3>
+          <h3>ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€¹Ã¢â‚¬Â  Monthly Trend</h3>
           <LineChart width={600} height={300} data={analyticsMonthly}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
